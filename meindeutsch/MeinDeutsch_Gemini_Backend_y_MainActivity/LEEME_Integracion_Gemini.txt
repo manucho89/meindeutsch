@@ -1,0 +1,19 @@
+Mein Deutsch — integración Gemini + Android
+
+Archivos:
+- MainActivity_MeinDeutsch_Gemini.kt: MainActivity completa basada en Mein Deutsch v2.3, llama a https://mein-deutsch-ai-server.vercel.app/api/exercises y usa ejercicios locales si no hay conexión o falla el backend. Conserva 6 tipos de actividad y las preguntas de conjugación. No muestra avisos sobre IA o modo local.
+- exercises.js: endpoint Vercel que genera 12 ejercicios con Gemini (2 por tipo). Usa GEMINI_API_KEY en variables de entorno de Vercel; no pongas la clave en Android ni en GitHub.
+
+Instalación backend:
+1. En GitHub abre api/exercises.js y sustituye su contenido por el de exercises.js incluido.
+2. Commit changes y espera a que Vercel publique el despliegue.
+3. Comprueba GET https://mein-deutsch-ai-server.vercel.app/api/exercises; debe responder JSON con service Mein Deutsch AI (Gemini).
+4. GEMINI_API_KEY debe estar guardada en Vercel como Secret para Production. No actives facturación si solo quieres probar el nivel gratuito; este nivel está sujeto a límites de Google.
+
+Instalación Android:
+1. Haz copia del MainActivity.kt que funciona ahora.
+2. Abre el archivo nuevo y reemplaza todo el contenido del MainActivity.kt del proyecto. Este archivo conserva package com.manuel.meindeutsch, de acuerdo con el AndroidManifest.xml compartido. Si el package de tu archivo actual no coincide, mantén la declaración package de tu proyecto en la primera línea.
+3. Verifica que AndroidManifest.xml contenga permisos INTERNET y ACCESS_NETWORK_STATE (el manifiesto compartido ya los tiene).
+4. Ejecuta Run.
+
+La API puede devolver errores por límites gratuitos, cuotas o configuración. En ese caso, la app vuelve al banco local sin mostrar el motivo. El código se ha revisado estáticamente, pero no se ha compilado en tu proyecto Android Studio.

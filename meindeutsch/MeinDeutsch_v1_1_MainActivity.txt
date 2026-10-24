@@ -1,0 +1,379 @@
+package com.manuel.meindeutsch
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+private val Azul = Color(0xFF2457A7)
+private val Fondo = Color(0xFFF3F6FB)
+private val Verde = Color(0xFF21865B)
+private val Texto = Color(0xFF20314D)
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                MeinDeutschApp()
+            }
+        }
+    }
+}
+
+private data class Lernkarte(
+    val deutsch: String,
+    val spanisch: String,
+    val einheit: Int,
+    val hinweis: String = ""
+)
+
+private data class Frage(
+    val frage: String,
+    val optionen: List<String>,
+    val richtig: Int,
+    val erklaerung: String
+)
+
+private val karten = listOf(
+    Lernkarte("Hallo!", "¡Hola!", 1, "Saludo informal."),
+    Lernkarte("Guten Morgen!", "¡Buenos días! (por la mañana)", 1),
+    Lernkarte("Guten Tag!", "¡Buenos días! / ¡Buenas tardes!", 1, "Saludo habitual durante el día."),
+    Lernkarte("Guten Abend!", "¡Buenas tardes! / ¡Buenas noches!", 1, "Se utiliza al llegar por la tarde-noche."),
+    Lernkarte("Gute Nacht!", "¡Buenas noches! (para despedirse antes de dormir)", 1),
+    Lernkarte("Tschüs!", "¡Adiós! / ¡Hasta luego!", 1, "Despedida informal."),
+    Lernkarte("Auf Wiedersehen!", "¡Adiós!", 1, "Despedida más formal."),
+    Lernkarte("Danke!", "¡Gracias!", 1),
+    Lernkarte("Bitte!", "Por favor / De nada", 1, "El significado depende del contexto."),
+    Lernkarte("Ich heiße …", "Me llamo …", 1),
+    Lernkarte("Wie heißt du?", "¿Cómo te llamas?", 1, "Pregunta informal."),
+    Lernkarte("Wie heißen Sie?", "¿Cómo se llama usted?", 1, "Pregunta formal; Sie se escribe con mayúscula."),
+    Lernkarte("Woher kommst du?", "¿De dónde eres?", 1),
+    Lernkarte("Ich komme aus Spanien.", "Soy de España.", 1),
+    Lernkarte("Wo wohnst du?", "¿Dónde vives?", 1),
+    Lernkarte("Ich wohne in Barcelona.", "Vivo en Barcelona.", 1),
+    Lernkarte("die Sprache", "el idioma", 1, "Sustantivo femenino: die."),
+    Lernkarte("die Zahl", "el número", 1, "Sustantivo femenino: die."),
+    Lernkarte("der Freund", "el amigo", 2, "Femenino: die Freundin."),
+    Lernkarte("die Freundin", "la amiga", 2),
+    Lernkarte("der Kollege", "el compañero de trabajo", 2, "Femenino: die Kollegin."),
+    Lernkarte("die Kollegin", "la compañera de trabajo", 2),
+    Lernkarte("fotografieren", "hacer fotografías", 2),
+    Lernkarte("joggen", "salir a correr", 2),
+    Lernkarte("singen", "cantar", 2),
+    Lernkarte("tanzen", "bailar", 2),
+    Lernkarte("kochen", "cocinar", 2),
+    Lernkarte("reisen", "viajar", 2),
+    Lernkarte("schwimmen", "nadar", 2),
+    Lernkarte("Musik hören", "escuchar música", 2),
+    Lernkarte("Fußball spielen", "jugar al fútbol", 2),
+    Lernkarte("gern", "con gusto; expresa que algo gusta", 2, "Ich schwimme gern. = Me gusta nadar."),
+    Lernkarte("der Montag", "el lunes", 2),
+    Lernkarte("der Dienstag", "el martes", 2),
+    Lernkarte("das Wochenende", "el fin de semana", 2),
+    Lernkarte("Wann?", "¿Cuándo?", 2),
+    Lernkarte("Gehen wir ins Kino?", "¿Vamos al cine?", 2),
+    Lernkarte("Ja, gern!", "¡Sí, encantado/a!", 2),
+    Lernkarte("Das geht leider nicht.", "Por desgracia, no puedo / no me va bien.", 2),
+    Lernkarte("der Beruf", "la profesión", 2),
+    Lernkarte("der Arzt / die Ärztin", "el médico / la médica", 2)
+)
+
+private val fragenEinheit1 = listOf(
+    Frage("¿Qué significa «Wie heißt du?»?", listOf("¿Dónde vives?", "¿Cómo te llamas?", "¿De dónde eres?"), 1, "«Wie heißt du?» es una pregunta informal para preguntar el nombre."),
+    Frage("¿Qué saludo se utiliza normalmente por la mañana?", listOf("Gute Nacht!", "Guten Morgen!", "Auf Wiedersehen!"), 1, "«Guten Morgen!» significa buenos días por la mañana."),
+    Frage("¿Qué significa «Ich komme aus Spanien»?", listOf("Vivo en España", "Hablo español", "Soy de España"), 2, "«kommen aus» expresa origen."),
+    Frage("¿Cuál es la forma formal de «¿Cómo te llamas?»?", listOf("Wie heißen Sie?", "Wie heißt du?", "Woher kommst du?"), 0, "Se usa «Sie» para dirigirse formalmente a alguien."),
+    Frage("¿Qué significa «die Sprache»?", listOf("el nombre", "el idioma", "el número"), 1, "«die Sprache» significa el idioma o la lengua.")
+)
+
+private val fragenEinheit2 = listOf(
+    Frage("¿Qué significa «der Freund»?", listOf("el amigo", "el compañero de trabajo", "el profesor"), 0, "«der Freund» es el amigo; «die Freundin», la amiga."),
+    Frage("¿Qué significa «Ich schwimme gern»?", listOf("No sé nadar", "Me gusta nadar", "Voy a nadar mañana"), 1, "«gern» expresa que te gusta hacer algo."),
+    Frage("¿Cuál es la traducción de «Wann?»?", listOf("¿Quién?", "¿Dónde?", "¿Cuándo?"), 2, "«Wann?» pregunta por el momento o el día."),
+    Frage("¿Qué significa «Gehen wir ins Kino?»?", listOf("¿Vamos al cine?", "¿Trabajamos en el cine?", "¿Dónde está el cine?"), 0, "En preguntas de sí/no, el verbo puede ir al principio: «Gehen wir …?»"),
+    Frage("¿Qué significa «die Kollegin»?", listOf("la amiga", "la compañera de trabajo", "la profesión"), 1, "«die Kollegin» es la compañera de trabajo.")
+)
+
+@Composable
+private fun MeinDeutschApp() {
+    var bildschirm by remember { mutableStateOf("start") }
+    var einheitAuswahl by remember { mutableIntStateOf(1) }
+
+    Scaffold(
+        containerColor = Fondo,
+        topBar = {
+            Surface(color = Azul) {
+                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
+                    Text("🇩🇪 Mein Deutsch", fontSize = 27.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text("Lerne Deutsch jeden Tag!", fontSize = 14.sp, color = Color.White)
+                }
+            }
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp)
+        ) {
+            when (bildschirm) {
+                "start" -> Inicio(
+                    alResumen = { einheitAuswahl = it; bildschirm = "resumen" },
+                    alEjercicio = { einheitAuswahl = it; bildschirm = "ejercicios" },
+                    alTarjetas = { bildschirm = "tarjetas" }
+                )
+                "resumen" -> ResumenUnidad(einheit = einheitAuswahl, alVolver = { bildschirm = "start" })
+                "tarjetas" -> TarjetasMemoria(alVolver = { bildschirm = "start" })
+                "ejercicios" -> Ejercicios(einheit = einheitAuswahl, alVolver = { bildschirm = "start" })
+            }
+            Spacer(Modifier.height(24.dp))
+            Text("Ein bisschen jeden Tag! · ¡Un poco cada día!", color = Color.Gray, fontSize = 13.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
+        }
+    }
+}
+
+@Composable
+private fun Inicio(
+    alResumen: (Int) -> Unit,
+    alEjercicio: (Int) -> Unit,
+    alTarjetas: () -> Unit
+) {
+    Text("Hallo! 👋", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Texto)
+    Text("¿Qué quieres repasar hoy?", fontSize = 17.sp, modifier = Modifier.padding(top = 4.dp, bottom = 16.dp))
+
+    MenuCard("📘 Unidad 1 · Guten Tag!", "Resumen de lo estudiado: saludos, presentaciones, origen, idiomas y números.", Color(0xFFE4EDFF)) { alResumen(1) }
+    MenuCard("📗 Unidad 2 · Freunde, Kollegen und ich", "Resumen: amigos, compañeros, aficiones, días de la semana y profesiones.", Color(0xFFE0F4E9)) { alResumen(2) }
+
+    Text("Practicar", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Texto, modifier = Modifier.padding(top = 8.dp, bottom = 8.dp))
+    MenuCard("🧠 Tarjetas de memoria", "Pulsa una tarjeta para ver la traducción. Elige Unidad 1, Unidad 2 o todas.", Color(0xFFFFEEDB), alTarjetas)
+    MenuCard("✍️ Ejercicios · Unidad 1", "Comprueba lo que recuerdas de la primera unidad.", Color.White) { alEjercicio(1) }
+    MenuCard("✍️ Ejercicios · Unidad 2", "Practica vocabulario y conceptos de la segunda unidad.", Color.White) { alEjercicio(2) }
+
+    Spacer(Modifier.height(8.dp))
+    Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF6D8))) {
+        Text(
+            "Nota: los resúmenes y las tarjetas son material de repaso original basado en los temas y el glosario públicos de Netzwerk neu A1.1. Comprueba con tus apuntes qué apartados habéis trabajado ya en clase.",
+            modifier = Modifier.padding(14.dp), fontSize = 13.sp, color = Texto
+        )
+    }
+}
+
+@Composable
+private fun MenuCard(titulo: String, descripcion: String, color: Color, alPulsar: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 11.dp).clickable { alPulsar() },
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = color),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(Modifier.padding(17.dp)) {
+            Text(titulo, fontSize = 19.sp, fontWeight = FontWeight.Bold, color = Texto)
+            Spacer(Modifier.height(5.dp))
+            Text(descripcion, fontSize = 14.sp, color = Color.DarkGray)
+        }
+    }
+}
+
+@Composable
+private fun ResumenUnidad(einheit: Int, alVolver: () -> Unit) {
+    val titel = if (einheit == 1) "Unidad 1 · Guten Tag!" else "Unidad 2 · Freunde, Kollegen und ich"
+    Text(titel, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Texto)
+    Text("Resumen para estudiar · explicación sencilla + ejemplos", fontSize = 14.sp, color = Color.DarkGray, modifier = Modifier.padding(top = 5.dp, bottom = 14.dp))
+
+    if (einheit == 1) {
+        ResumenBloque("1. Saludar y despedirse", "Hallo! = ¡Hola!\nGuten Morgen! = ¡Buenos días! (por la mañana)\nGuten Tag! = ¡Buenos días! / ¡Buenas tardes!\nGuten Abend! = ¡Buenas tardes/noches!\nGute Nacht! = ¡Buenas noches! (antes de dormir)\nTschüs! = ¡Adiós! (informal)\nAuf Wiedersehen! = ¡Adiós! (más formal)", "Recuerda: «Gute Nacht» suele usarse al despedirse por la noche, no como saludo al llegar.")
+        ResumenBloque("2. Decir tu nombre", "Ich heiße Manu. = Me llamo Manu.\nIch bin Manu. = Soy Manu.\nWie heißt du? = ¿Cómo te llamas? (informal)\nWie heißen Sie? = ¿Cómo se llama usted? (formal)\nWer bist du? = ¿Quién eres?", "Du es informal. Sie se usa para dirigirse formalmente a una persona y se escribe con mayúscula.")
+        ResumenBloque("3. Preguntar de dónde eres y dónde vives", "Woher kommst du? = ¿De dónde eres?\nIch komme aus Spanien. = Soy de España.\nWo wohnst du? = ¿Dónde vives?\nIch wohne in Barcelona. = Vivo en Barcelona.\nWelche Sprache sprichst du? = ¿Qué idioma hablas?", "«Woher» pregunta por el origen; «wo» pregunta por el lugar. «aus» expresa procedencia y «in» puede indicar dónde vives.")
+        ResumenBloque("4. Pronombres personales", "ich = yo\ndu = tú\ner = él · sie = ella · es = ello\nwir = nosotros/as\nihr = vosotros/as\nsie = ellos/ellas\nSie = usted/ustedes (formal)", "Distingue «sie» (ella/ellos/ellas) de «Sie» (usted/ustedes formal): la mayúscula importa.")
+        ResumenBloque("5. Verbos básicos: sein y heißen", "sein (ser/estar): ich bin · du bist · er/sie/es ist · wir sind · ihr seid · sie/Sie sind\nheißen (llamarse): ich heiße · du heißt · er/sie/es heißt · wir heißen · ihr heißt · sie/Sie heißen", "Ejemplos: Ich bin Manuel. / Wie heißt du? El verbo cambia según la persona.")
+        ResumenBloque("6. Números, alfabeto y datos personales", "En esta parte se practican números y letras, decir o reconocer un número de teléfono y deletrear nombres o direcciones de correo.\n\nNützliche Sätze:\nWie ist deine Telefonnummer? = ¿Cuál es tu número de teléfono?\nKannst du das buchstabieren? = ¿Puedes deletrearlo?\nNoch einmal, bitte. = Otra vez, por favor.", "Para deletrear, escucha cada letra con calma. Si no entiendes: «Das verstehe ich nicht» = No lo entiendo.")
+    } else {
+        ResumenBloque("1. Amigos y compañeros", "der Freund = el amigo\ndie Freundin = la amiga\nder Kollege = el compañero de trabajo\ndie Kollegin = la compañera de trabajo\ndie Leute = la gente", "En muchos nombres de personas, la forma femenina añade -in: Kollege → Kollegin. Aprende el sustantivo con su artículo.")
+        ResumenBloque("2. Hablar de aficiones", "fotografieren = hacer fotos\njoggen = salir a correr\nsingen = cantar\ntanzen = bailar\nkochen = cocinar\nreisen = viajar\nschwimmen = nadar\nMusik hören = escuchar música\nFußball spielen = jugar al fútbol\nins Kino gehen = ir al cine", "El infinitivo suele terminar en -en. Para hablar de ti, conjuga el verbo: Ich koche. / Ich schwimme.")
+        ResumenBloque("3. Decir qué te gusta hacer: gern", "Ich schwimme gern. = Me gusta nadar.\nIch höre gern Musik. = Me gusta escuchar música.\nIch lese nicht so gern. = No me gusta mucho leer.\nEs geht so. = Más o menos / regular.\nJa, sehr gern! = Sí, mucho / encantado.", "«gern» suele colocarse después del verbo conjugado o al final del grupo verbal. Expresa que disfrutas haciendo algo.")
+        ResumenBloque("4. Días de la semana y quedar", "Montag = lunes · Dienstag = martes\nMittwoch = miércoles · Donnerstag = jueves\nFreitag = viernes · Samstag = sábado\nSonntag = domingo · das Wochenende = el fin de semana\nWann? = ¿Cuándo?\nGehen wir ins Kino? = ¿Vamos al cine?\nJa, gern! = ¡Sí, encantado!\nDas geht leider nicht. = Por desgracia, no me va bien.", "En una pregunta de sí/no, el verbo suele ir al principio: «Gehen wir …?».")
+        ResumenBloque("5. Profesiones y artículos", "der Beruf = la profesión\nder Arzt / die Ärztin = el médico / la médica\nder Kellner / die Kellnerin = el camarero / la camarera\nder Student / die Studentin = el estudiante / la estudiante", "Los sustantivos alemanes se escriben con mayúscula. Aprende cada sustantivo con su artículo: der (masculino), die (femenino), das (neutro). El género gramatical no siempre coincide con el español.")
+        ResumenBloque("6. Preguntas útiles", "Was machst du gern? = ¿Qué te gusta hacer?\nWann hast du Zeit? = ¿Cuándo tienes tiempo?\nArbeitest du morgen? = ¿Trabajas mañana?\nWas bist du von Beruf? = ¿A qué te dedicas?", "Las preguntas que empiezan por una palabra interrogativa como «Was?» o «Wann?» normalmente colocan el verbo después de esa palabra. Las preguntas de sí/no suelen empezar por el verbo.")
+    }
+
+    Spacer(Modifier.height(12.dp))
+    Button(onClick = alVolver, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Azul)) { Text("Volver al menú") }
+}
+
+@Composable
+private fun ResumenBloque(titulo: String, contenido: String, consejo: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(titulo, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Azul)
+            Spacer(Modifier.height(9.dp))
+            Text(contenido, fontSize = 16.sp, lineHeight = 23.sp, color = Texto)
+            Spacer(Modifier.height(10.dp))
+            Surface(color = Color(0xFFEAF2FF), shape = RoundedCornerShape(10.dp)) {
+                Text("💡 $consejo", modifier = Modifier.padding(10.dp), fontSize = 14.sp, lineHeight = 20.sp, color = Texto)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TarjetasMemoria(alVolver: () -> Unit) {
+    var filtro by remember { mutableIntStateOf(1) }
+    var indice by remember { mutableIntStateOf(0) }
+    var reverso by remember { mutableStateOf(false) }
+    val mazo = karten.filter { filtro == 0 || it.einheit == filtro }
+    val posicion = indice.coerceIn(0, (mazo.size - 1).coerceAtLeast(0))
+    val carta = mazo[posicion]
+
+    Text("🧠 Tarjetas de memoria", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Texto)
+    Text("Pulsa la tarjeta para descubrir la traducción.", fontSize = 15.sp, modifier = Modifier.padding(top = 5.dp, bottom = 12.dp))
+
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        FiltroBoton("Unidad 1", filtro == 1, Modifier.weight(1f)) { filtro = 1; indice = 0; reverso = false }
+        FiltroBoton("Unidad 2", filtro == 2, Modifier.weight(1f)) { filtro = 2; indice = 0; reverso = false }
+        FiltroBoton("Todas", filtro == 0, Modifier.weight(1f)) { filtro = 0; indice = 0; reverso = false }
+    }
+
+    Spacer(Modifier.height(12.dp))
+    Text("Tarjeta ${posicion + 1} de ${mazo.size}", fontSize = 14.sp, color = Color.DarkGray)
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp).clickable { reverso = !reverso },
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = if (reverso) Color(0xFFE0F4E9) else Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 36.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(if (reverso) "ESPAÑOL" else "ALEMÁN", fontSize = 13.sp, color = Azul, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(18.dp))
+            Text(if (reverso) carta.spanisch else carta.deutsch, fontSize = 25.sp, lineHeight = 32.sp, color = Texto, fontWeight = FontWeight.Bold)
+            if (reverso && carta.hinweis.isNotBlank()) {
+                Spacer(Modifier.height(14.dp))
+                Text(carta.hinweis, fontSize = 15.sp, color = Color.DarkGray, lineHeight = 21.sp)
+            }
+            Spacer(Modifier.height(18.dp))
+            Text(if (reverso) "Pulsa para volver al alemán" else "Pulsa para ver la traducción", fontSize = 13.sp, color = Color.Gray)
+        }
+    }
+
+    Spacer(Modifier.height(14.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(
+            onClick = { indice = if (indice == 0) mazo.lastIndex else indice - 1; reverso = false },
+            modifier = Modifier.weight(1f)
+        ) { Text("Anterior") }
+        Button(
+            onClick = { indice = (indice + 1) % mazo.size; reverso = false },
+            modifier = Modifier.weight(1f),
+            colors = ButtonDefaults.buttonColors(containerColor = Azul)
+        ) { Text("Siguiente") }
+    }
+    Spacer(Modifier.height(8.dp))
+    OutlinedButton(onClick = alVolver, modifier = Modifier.fillMaxWidth()) { Text("Volver al menú") }
+}
+
+@Composable
+private fun FiltroBoton(texto: String, seleccionado: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    if (seleccionado) {
+        Button(onClick = onClick, modifier = modifier, colors = ButtonDefaults.buttonColors(containerColor = Azul)) { Text(texto) }
+    } else {
+        OutlinedButton(onClick = onClick, modifier = modifier) { Text(texto) }
+    }
+}
+
+@Composable
+private fun Ejercicios(einheit: Int, alVolver: () -> Unit) {
+    val preguntas = if (einheit == 1) fragenEinheit1 else fragenEinheit2
+    var indice by remember(einheit) { mutableIntStateOf(0) }
+    var respuesta by remember(einheit) { mutableStateOf<Int?>(null) }
+    var aciertos by remember(einheit) { mutableIntStateOf(0) }
+    var terminado by remember(einheit) { mutableStateOf(false) }
+
+    Text("✍️ Ejercicios · Unidad $einheit", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Texto)
+    Spacer(Modifier.height(6.dp))
+
+    if (terminado) {
+        Card(colors = CardDefaults.cardColors(containerColor = Color.White)) {
+            Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("¡Gut gemacht! 🎉", fontSize = 25.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(10.dp))
+                Text("Resultado: $aciertos de ${preguntas.size}", fontSize = 21.sp, fontWeight = FontWeight.Bold, color = Azul)
+                Spacer(Modifier.height(8.dp))
+                Text("Vuelve al resumen si quieres repasar antes de intentarlo otra vez.", fontSize = 15.sp)
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        Button(onClick = { indice = 0; respuesta = null; aciertos = 0; terminado = false }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Azul)) { Text("Repetir ejercicios") }
+    } else {
+        Text("Pregunta ${indice + 1} de ${preguntas.size}", fontSize = 14.sp, color = Color.DarkGray)
+        Spacer(Modifier.height(10.dp))
+        Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(18.dp)) {
+            Column(Modifier.padding(17.dp)) {
+                Text(preguntas[indice].frage, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Texto)
+                Spacer(Modifier.height(14.dp))
+                preguntas[indice].optionen.forEachIndexed { opcion, texto ->
+                    val elegida = respuesta == opcion
+                    val correcta = opcion == preguntas[indice].richtig
+                    val color = when {
+                        respuesta != null && correcta -> Color(0xFFDDF5E5)
+                        elegida && !correcta -> Color(0xFFFFE2E2)
+                        else -> Fondo
+                    }
+                    Surface(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable(enabled = respuesta == null) { respuesta = opcion; if (opcion == preguntas[indice].richtig) aciertos++ },
+                        color = color, shape = RoundedCornerShape(12.dp)
+                    ) { Text(texto, modifier = Modifier.padding(14.dp), fontSize = 16.sp, color = Texto) }
+                }
+                if (respuesta != null) {
+                    Spacer(Modifier.height(10.dp))
+                    Text(if (respuesta == preguntas[indice].richtig) "✅ ¡Correcto!" else "❌ La respuesta correcta es: ${preguntas[indice].optionen[preguntas[indice].richtig]}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Spacer(Modifier.height(6.dp))
+                    Text(preguntas[indice].erklaerung, fontSize = 15.sp, lineHeight = 21.sp)
+                    Spacer(Modifier.height(12.dp))
+                    Button(
+                        onClick = { if (indice < preguntas.lastIndex) { indice++; respuesta = null } else { terminado = true } },
+                        modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Azul)
+                    ) { Text(if (indice < preguntas.lastIndex) "Siguiente pregunta" else "Ver resultado") }
+                }
+            }
+        }
+    }
+    Spacer(Modifier.height(12.dp))
+    OutlinedButton(onClick = alVolver, modifier = Modifier.fillMaxWidth()) { Text("Volver al menú") }
+}

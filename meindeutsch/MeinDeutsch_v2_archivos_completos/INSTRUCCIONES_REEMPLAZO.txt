@@ -1,0 +1,13 @@
+MEIN DEUTSCH v2.0 — ARCHIVOS COMPLETOS
+
+1) Haz una copia de seguridad del proyecto actual.
+2) Reemplaza el contenido de app/src/main/java/.../MainActivity.kt por el archivo MainActivity.kt incluido.
+   La primera línea es: package com.manuel.meindeutsch
+3) Reemplaza el contenido de app/src/main/AndroidManifest.xml por AndroidManifest.xml incluido.
+4) En AndroidManifest.xml los permisos INTERNET y ACCESS_NETWORK_STATE están antes de <application>.
+5) Guarda, espera la sincronización y ejecuta Build > Make Project antes de pulsar Run.
+
+NOTA: el archivo Kotlin contiene AI_ENDPOINT con la URL provisional
+https://CAMBIA-ESTE-DOMINIO.vercel.app/api/exercises
+Hasta que publiques el backend y pongas su URL real, la app seguirá usando el generador local.
+La clave de OpenAI no debe ponerse en Kotlin ni en el APK.

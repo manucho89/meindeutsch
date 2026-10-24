@@ -1,0 +1,14 @@
+Mein Deutsch v2.3
+
+Contenido: MainActivity.kt actualizado con un resumen de la Unidad 1 revisado a partir de los PDF Kursbuch y Übungsbuch, un banco más amplio de ejercicios locales y una categoría específica para conjugar verbos.
+
+Cambios principales:
+- Sin llamadas a la API de OpenAI ni mensajes de conexión/modo local.
+- Dos ejercicios de conjugación por sesión.
+- Sesiones mixtas de 12 actividades: test, completar, relacionar, ordenar, traducir y conjugar.
+- Corrección de la finalización del ejercicio de relacionar parejas.
+- Resumen de Unidad 1 ampliado: saludos, presentaciones, trato informal/formal, preguntas W, verbos sein/heißen/kommen/wohnen/sprechen, países e idiomas, números 0–20, teléfono, alfabeto y correo electrónico.
+
+Instalación: haz una copia del MainActivity.kt actual, sustituye todo el contenido por el de este archivo y ejecuta Run en Android Studio. Comprueba el paquete de la primera línea con el del archivo actual: este archivo conserva `package com.manuel.meindeutsch` de la versión que se utilizó como base.
+
+Nota: el archivo se ha revisado para evitar referencias al servidor de IA, pero no se ha compilado dentro de tu proyecto Android Studio completo. Si Android Studio muestra un error, no borres nada; envía una captura del error.

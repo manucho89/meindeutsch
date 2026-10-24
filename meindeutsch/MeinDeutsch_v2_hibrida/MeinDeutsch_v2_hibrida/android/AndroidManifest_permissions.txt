@@ -1,0 +1,6 @@
+Añade estas dos líneas en AndroidManifest.xml, dentro de <manifest ...> y ANTES de <application ...>:
+
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+No reemplaces todo el manifiesto ni cambies el nombre completo de MainActivity. Conserva el resto del archivo que ya funciona.

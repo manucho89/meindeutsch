@@ -1,0 +1,9 @@
+{
+  "name": "mein-deutsch-ai-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Servidor de ejercicios de alemán A1.1 para la app Mein Deutsch usando Vercel Functions y OpenAI API",
+  "engines": {
+    "node": ">=20"
+  }
+}
